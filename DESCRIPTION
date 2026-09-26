@@ -1,0 +1,38 @@
+Package: ggCheysson
+Title: Graphic Styles of Emile Cheysson for 'ggplot2'
+Version: 1.0.1
+Date: 2026-09-14
+Authors@R: 
+    c(person(given = "Michael", family = "Friendly", 
+             email = "friendly@yorku.ca", role = c("aut", "cre"),
+             comment = c(ORCID = "0000-0002-3237-0941")),
+      person(given = "RJ", family = "Andrews", role = "ctb"),
+      person(given = "Tom", family = "Shanley",  role = "ctb"),
+      person(given = "Kenneth", family = "Fields",  role = "ctb")
+      )
+Description: Implements for 'ggplot2' the stylistic elements (fonts, hatched patterns, color palettes) used by 'Emile
+  Cheysson' in the 'Albums de Statistique Graphique', sometimes called the pinnacle of the
+  Golden Age of Statistical Graphics. 
+Imports: ggplot2
+Suggests: ggpattern, ggthemes, gridpattern, systemfonts, showtext,
+        sysfonts, ragg, knitr, rmarkdown, Guerry, sf, tidyr, dplyr
+License: GPL (>= 3)
+Language: en-US
+Encoding: UTF-8
+URL: https://github.com/friendly/ggCheysson,
+        https://friendly.github.io/ggCheysson/
+BugReports: https://github.com/friendly/ggCheysson/issues
+Depends: R (>= 3.5)
+LazyData: true
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.1.0
+NeedsCompilation: no
+Packaged: 2026-09-15 15:39:21 UTC; friendly
+Author: Michael Friendly [aut, cre] (ORCID:
+    <https://orcid.org/0000-0002-3237-0941>),
+  RJ Andrews [ctb],
+  Tom Shanley [ctb],
+  Kenneth Fields [ctb]
+Maintainer: Michael Friendly <friendly@yorku.ca>
+Repository: CRAN
+Date/Publication: 2026-09-26 16:40:13 UTC
