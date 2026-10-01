@@ -1,7 +1,7 @@
 Package: ggCheysson
 Title: Graphic Styles of Emile Cheysson for 'ggplot2'
-Version: 1.0.1
-Date: 2026-09-14
+Version: 1.1.0
+Date: 2026-09-28
 Authors@R: 
     c(person(given = "Michael", family = "Friendly", 
              email = "friendly@yorku.ca", role = c("aut", "cre"),
@@ -27,7 +27,7 @@ LazyData: true
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.1.0
 NeedsCompilation: no
-Packaged: 2026-09-15 15:39:21 UTC; friendly
+Packaged: 2026-09-30 18:49:34 UTC; friendly
 Author: Michael Friendly [aut, cre] (ORCID:
     <https://orcid.org/0000-0002-3237-0941>),
   RJ Andrews [ctb],
@@ -35,4 +35,4 @@ Author: Michael Friendly [aut, cre] (ORCID:
   Kenneth Fields [ctb]
 Maintainer: Michael Friendly <friendly@yorku.ca>
 Repository: CRAN
-Date/Publication: 2026-09-26 16:40:13 UTC
+Date/Publication: 2026-10-01 08:10:24 UTC

@@ -5,7 +5,7 @@
 \alias{cheysson_palettes}
 \title{Cheysson Color Palettes}
 \format{
-A list of 20 color palettes, each containing:
+A list of 25 color palettes, each containing:
 \describe{
 \item{colors}{Character vector of hex color codes}
 \item{type}{Palette type: "sequential", "diverging", "grouped", or "category"}
@@ -39,9 +39,18 @@ Palette types:
 \itemize{
 \item \strong{Sequential} (7 palettes): Ordered colors for quantitative data
 \item \strong{Diverging} (2 palettes): Two contrasting colors with neutral midpoint
-\item \strong{Grouped} (5 palettes): Related colors for comparing groups
+\item \strong{Grouped} (10 palettes): Related colors for comparing groups
 \item \strong{Category} (6 palettes): Distinct colors for categorical data
 }
+
+Palette order: sequential palettes are stored from low to high (light to
+dark), and diverging palettes from one extreme through the neutral middle
+to the other, so \code{reverse = TRUE} in the scales flips the direction the
+same way for every palette. Category and grouped palettes keep the order
+of RJ Andrews' swatches. (\verb{1886_26}, typed "sequential" in the source, has
+two hues and no single light-to-dark order.) Some sequential palettes, such
+as \verb{1881_12}, have a single color: their steps are in the hatching, see
+\link{cheysson_patterns}.
 }
 \examples{
 # List available palettes
@@ -56,6 +65,6 @@ names(sequential_pals)
 
 }
 \seealso{
-\code{\link{cheysson_pal}}, \code{\link{scale_color_cheysson}}
+\code{\link[=cheysson_pal]{cheysson_pal()}}, \code{\link[=scale_color_cheysson]{scale_color_cheysson()}}
 }
 \keyword{datasets}

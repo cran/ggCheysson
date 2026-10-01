@@ -5,6 +5,12 @@ knitr::opts_chunk$set(
   fig.width = 8,
   fig.height = 7,
   fig.align = "center",
+  # ragg, not the default png(): on Intel macOS the Quartz png() device
+  # segfaults drawing ggpattern's grid masks at >= 96 dpi (CRAN check ERROR on 1.0.1)
+  dev = if (requireNamespace("ragg", quietly = TRUE)) "ragg_png" else "png",
+  # draw showtext fonts at the device's real dpi (pkgdown renders retina at 2x;
+  # without this, text there comes out at half size)
+  fig.showtext = TRUE,
   warning = FALSE,
   message = FALSE
 )
@@ -67,13 +73,13 @@ france_data <- merge(france_sf, guerry_ranked,
 
 # Check the join
 cat("Departments in map:", nrow(france_sf), "\n")
-cat("Departments with data:", sum(!is.na(france_data$Crime_pers)), "\n")
+cat("Departments with data:", sum(!is.na(france_data$Crime_pers_rank)), "\n")
 
 ## ----map-crime-pers, fig.height=7, fig.width=8--------------------------------
 # Map of crimes against persons
 p1 <- ggplot(france_data) +
   geom_sf(aes(fill = Crime_pers_rank), color = "black", linewidth = 0.3) +
-  scale_fill_cheysson("1895_04", discrete = FALSE,
+  scale_fill_cheysson("1895_16", discrete = FALSE,
                       name = "Rank") +
   labs(
     title = "Crimes Against Persons",
@@ -82,8 +88,6 @@ p1 <- ggplot(france_data) +
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 12),
     legend.position = "right"
   )
 
@@ -92,7 +96,7 @@ print(p1)
 ## ----map-crime-prop, fig.height=7, fig.width=8--------------------------------
 p2 <- ggplot(france_data) +
   geom_sf(aes(fill = Crime_prop_rank), color = "black", linewidth = 0.3) +
-  scale_fill_cheysson("1895_04", discrete = FALSE,
+  scale_fill_cheysson("1895_16", discrete = FALSE,
                       name = "Rank") +
   labs(
     title = "Crimes Against Property",
@@ -101,8 +105,6 @@ p2 <- ggplot(france_data) +
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 12),
     legend.position = "right"
   )
 
@@ -119,7 +121,7 @@ france_data$Literacy_quint <- cut(france_data$Literacy_rank,
 
 p3 <- ggplot(france_data) +
   geom_sf(aes(fill = Literacy_quint), color = "black", linewidth = 0.3) +
-  scale_fill_cheysson("1881_04",
+  scale_fill_cheysson("1881_22",
                       name = "Literacy\nQuintile",
                       na.value = "grey80") +
   labs(
@@ -129,8 +131,6 @@ p3 <- ggplot(france_data) +
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 11),
     legend.position = "right"
   )
 
@@ -138,35 +138,37 @@ print(p3)
 
 ## ----map-literacy-pattern, fig.height=7, fig.width=8--------------------------
 # Literacy with patterns - quintessential Cheysson style
+lit_spacing <- cheysson_pattern_params(cheysson_pattern("1888_27"), "pattern_spacing")
+
 p3b <- ggplot(france_data) +
   geom_sf_pattern(
     aes(fill = Literacy_quint,
-        pattern_type = Literacy_quint,
-        pattern_fill = Literacy_quint),
-    pattern = "stripe",
+        pattern = Literacy_quint,
+        pattern_fill = Literacy_quint,
+        pattern_spacing = Literacy_quint),
     pattern_density = 0.3,
-    pattern_spacing = 0.02,
+    pattern_colour = NA,
     color = "black",
     linewidth = 0.4
   ) +
-  scale_fill_cheysson_pattern("1881_04", na.value = "grey90") +
-  scale_pattern_fill_cheysson("1881_04", na.value = "grey90") +
-  scale_pattern_type_cheysson("1881_04") +
+  scale_fill_cheysson_pattern("1888_27", na.value = "grey90") +
+  scale_pattern_fill_cheysson("1888_27", na.value = "grey90") +
+  scale_pattern_type_cheysson("1888_27") +
+  scale_pattern_spacing_manual(values = 0.3 * lit_spacing) +
   labs(
-    title = "Literacy Rates with Cheysson Patterns",
-    subtitle = "Combining colors and hatching patterns (quintiles)",
+    title = "Literacy Rates",
+    subtitle = "Sequential hatching, sparse to solid (quintiles)",
     caption = "Data: André-Michel Guerry (1833)"
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 11),
     legend.position = "right"
   ) +
   guides(
     fill = guide_legend(title = "Literacy\nQuintile"),
-    pattern_type = guide_legend(title = "Literacy\nQuintile"),
-    pattern_fill = "none"
+    pattern = guide_legend(title = "Literacy\nQuintile"),
+    pattern_spacing = guide_legend(title = "Literacy\nQuintile"),
+    pattern_fill = guide_legend(title = "Literacy\nQuintile")
   )
 
 print(p3b)
@@ -182,7 +184,7 @@ france_data$Donations_cat <- cut(france_data$Donations_rank,
 
 p4 <- ggplot(france_data) +
   geom_sf(aes(fill = Donations_cat), color = "black", linewidth = 0.3) +
-  scale_fill_cheysson("1883_04",
+  scale_fill_cheysson("1883_31",
                       name = "Donations\nLevel",
                       na.value = "grey80") +
   labs(
@@ -192,44 +194,40 @@ p4 <- ggplot(france_data) +
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 12),
     legend.position = "right"
   )
 
 print(p4)
 
 ## ----map-donations-pattern, fig.height=7, fig.width=8-------------------------
-# Donations with varied pattern types
+# Donations: solid at the extremes, hatched in the middle
 p4b <- ggplot(france_data) +
   geom_sf_pattern(
     aes(fill = Donations_cat,
-        pattern_type = Donations_cat,
+        pattern = Donations_cat,
         pattern_fill = Donations_cat),
-    pattern = "stripe",
     pattern_density = 0.35,
     pattern_spacing = 0.025,
+    pattern_colour = NA,
     color = "black",
     linewidth = 0.4
   ) +
-  scale_fill_cheysson_pattern("1883_04", na.value = "grey90") +
-  scale_pattern_fill_cheysson("1883_04", na.value = "grey90") +
-  scale_pattern_type_cheysson("1883_04") +
+  scale_fill_cheysson_pattern("1883_31", na.value = "grey90") +
+  scale_pattern_fill_cheysson("1883_31", na.value = "grey90") +
+  scale_pattern_type_cheysson("1883_31") +
   labs(
-    title = "Charitable Donations with Hatching Patterns",
+    title = "Charitable Donations",
     subtitle = "Authentic Cheysson-style patterns and colors (quartiles)",
     caption = "Data: André-Michel Guerry (1833)"
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 11),
     legend.position = "right"
   ) +
   guides(
     fill = guide_legend(title = "Donations\nLevel"),
-    pattern_type = guide_legend(title = "Donations\nLevel"),
-    pattern_fill = "none"
+    pattern = guide_legend(title = "Donations\nLevel"),
+    pattern_fill = guide_legend(title = "Donations\nLevel")
   )
 
 print(p4b)
@@ -237,7 +235,7 @@ print(p4b)
 ## ----map-infants, fig.height=7, fig.width=8-----------------------------------
 p5 <- ggplot(france_data) +
   geom_sf(aes(fill = Infants_rank), color = "black", linewidth = 0.3) +
-  scale_fill_cheysson("1891_07", discrete = FALSE,
+  scale_fill_cheysson("1891_25", discrete = FALSE,
                       name = "Rank") +
   labs(
     title = "Illegitimate Births",
@@ -246,8 +244,6 @@ p5 <- ggplot(france_data) +
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 12),
     legend.position = "right"
   )
 
@@ -256,7 +252,7 @@ print(p5)
 ## ----map-suicides, fig.height=7, fig.width=8----------------------------------
 p6 <- ggplot(france_data) +
   geom_sf(aes(fill = Suicides_rank), color = "black", linewidth = 0.3) +
-  scale_fill_cheysson("1887_06", discrete = FALSE,
+  scale_fill_cheysson("1887_22", discrete = FALSE,
                       name = "Rank") +
   labs(
     title = "Suicides",
@@ -265,8 +261,6 @@ p6 <- ggplot(france_data) +
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 12),
     legend.position = "right"
   )
 
@@ -292,7 +286,7 @@ crime_long <- france_data |>
 
 p7 <- ggplot(crime_long) +
   geom_sf(aes(fill = Rank), color = "grey30", linewidth = 0.2) +
-  scale_fill_cheysson("1895_04", discrete = FALSE,
+  scale_fill_cheysson("1895_16", discrete = FALSE,
                       name = "Rank") +
   facet_wrap(~ Variable, ncol = 2) +
   labs(
@@ -302,8 +296,6 @@ p7 <- ggplot(crime_long) +
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 12),
     strip.background = element_rect(fill = "#edd493", color = "black"),
     strip.text = element_text(size = 10, face = "bold"),
     legend.position = "bottom",
@@ -335,8 +327,6 @@ p8 <- ggplot(france_data) +
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 12),
     legend.position = "right"
   )
 
@@ -347,32 +337,31 @@ print(p8)
 p8b <- ggplot(france_data) +
   geom_sf_pattern(
     aes(fill = .data[[region_col]],
-        pattern_type = .data[[region_col]],
-        pattern_fill = .data[[region_col]]),
-    pattern = "stripe",
+        pattern = .data[[region_col]],
+        pattern_fill = .data[[region_col]],
+        pattern_fill2 = .data[[region_col]],
+        pattern_angle = .data[[region_col]]),
+    pattern_colour = NA,
     pattern_density = 0.3,
     pattern_spacing = 0.02,
     color = "black",
     linewidth = 0.5
   ) +
-  scale_fill_cheysson_pattern("category") +
-  scale_pattern_fill_cheysson("category") +
-  scale_pattern_type_cheysson("category") +
+  scale_fill_cheysson_pattern("1883_30") +
+  scale_pattern_fill_cheysson("1883_30") +
+  scale_pattern_fill2_cheysson("1883_30") +
+  scale_pattern_type_cheysson("1883_30") +
+  scale_pattern_angle_cheysson("1883_30") +
   labs(
-    title = "Regions of France with Cheysson Patterns",
+    title = "Regions of France",
     subtitle = "Distinctive hatching patterns for each region - authentic Albums style",
-    caption = "Source: Guerry package"
+    caption = "Source: Guerry package",
+    fill = "Region", pattern = "Region", pattern_fill = "Region",
+    pattern_fill2 = "Region", pattern_angle = "Region"
   ) +
   theme_cheysson_map() +
   theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 11),
     legend.position = "right"
-  ) +
-  guides(
-    fill = guide_legend(title = "Region"),
-    pattern_type = guide_legend(title = "Region"),
-    pattern_fill = "none"
   )
 
 print(p8b)
@@ -394,7 +383,7 @@ france_data$Bivariate <- paste0(france_data$Crime_cat, "\n",
 # Plot
 p9 <- ggplot(france_data) +
   geom_sf(aes(fill = Crime_pers_rank), color = "black", linewidth = 0.5) +
-  scale_fill_cheysson("1895_04", discrete = FALSE, name = "Crime\nRank") +
+  scale_fill_cheysson("1895_16", discrete = FALSE, name = "Crime\nRank") +
   # Add point symbols sized by literacy
   geom_sf_text(aes(label = ifelse(Literacy_rank > 70, "H",
                                   ifelse(Literacy_rank < 25, "L", ""))),
@@ -404,11 +393,7 @@ p9 <- ggplot(france_data) +
     subtitle = "Crime Against Persons (color) and Literacy (H=High, L=Low)",
     caption = "Data: André-Michel Guerry (1833)"
   ) +
-  theme_cheysson_map() +
-  theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 11)
-  )
+  theme_cheysson_map()
 
 print(p9)
 

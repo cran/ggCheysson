@@ -5,6 +5,17 @@ knitr::opts_chunk$set(
   fig.width = 7,
   fig.height = 5,
   fig.align = "center",
+  # theme_cheysson()'s title/axis text is fixed-size (in points); displaying
+  # figures narrower than their rendered fig.width makes that text read at a
+  # larger, more legible fraction of the plot - it was reading too small
+  # when the full-width 7in figures were shown at their native size.
+  out.width = "75%",
+  # ragg, not the default png(): on Intel macOS the Quartz png() device
+  # segfaults drawing ggpattern's grid masks at >= 96 dpi (CRAN check ERROR on 1.0.1)
+  dev = if (requireNamespace("ragg", quietly = TRUE)) "ragg_png" else "png",
+  # draw showtext fonts at the device's real dpi (pkgdown renders retina at 2x;
+  # without this, text there comes out at half size)
+  fig.showtext = TRUE,
   warning = FALSE,
   message = FALSE
 )
@@ -43,10 +54,10 @@ data(iris)
 
 p1 <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Petal.Length)) +
   geom_point(size = 3, alpha = 0.8) +
-  scale_color_cheysson("1880_07", discrete = FALSE) +
+  scale_color_cheysson("1880_21", discrete = FALSE) +
   labs(
     title = "Iris Measurements",
-    subtitle = "Using Sequential Palette 1880_07",
+    subtitle = "Using Sequential Palette 1880, Plate 21",
     x = "Sepal Length (cm)",
     y = "Sepal Width (cm)",
     color = "Petal\nLength"
@@ -58,10 +69,10 @@ print(p1)
 ## ----scatterplot-category, fig.height=5, fig.width=7--------------------------
 p2 <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
   geom_point(size = 3, alpha = 0.8) +
-  scale_color_cheysson("1881_04") +
+  scale_color_cheysson("1881_22") +
   labs(
     title = "Iris Species Comparison",
-    subtitle = "Using Categorical Palette 1881_04",
+    subtitle = "Using Categorical Palette 1881, Plate 22",
     x = "Sepal Length (cm)",
     y = "Sepal Width (cm)"
   ) +
@@ -77,7 +88,7 @@ cyl_summary$cyl <- factor(cyl_summary$cyl)
 
 p3 <- ggplot(cyl_summary, aes(cyl, mpg, fill = cyl)) +
   geom_col(color = "black", linewidth = 0.8) +
-  scale_fill_cheysson("1883_04") +
+  scale_fill_cheysson("1883_31") +
   labs(
     title = "Automobile Efficiency by Cylinder Count",
     subtitle = "Average Miles per Gallon",
@@ -101,16 +112,15 @@ if (requireNamespace("ggpattern", quietly = TRUE)) {
 
   p4 <- ggplot(trade_data, aes(reorder(country, exports), exports, fill = country)) +
     geom_col_pattern(
-      aes(pattern_type = country, pattern_fill = country),
-      pattern = "stripe",
+      aes(pattern = country, pattern_fill = country),
       pattern_density = 0.3,
       pattern_spacing = 0.025,
       color = "black",
       linewidth = 0.8
     ) +
-    scale_fill_cheysson_pattern("1881_03") +
-    scale_pattern_fill_cheysson("1881_03") +
-    scale_pattern_type_cheysson("1881_03") +
+    scale_fill_cheysson_pattern("1886_28") +
+    scale_pattern_fill_cheysson("1886_28") +
+    scale_pattern_type_cheysson("1886_28") +
     labs(
       title = "Export Statistics by Nation",
       subtitle = "Annual Trade Volume (1885)",
@@ -139,7 +149,7 @@ railway_data <- data.frame(
 p5 <- ggplot(railway_data, aes(year, volume, color = type)) +
   geom_line(linewidth = 1.5) +
   geom_point(size = 2.5) +
-  scale_color_cheysson("1883_04") +
+  scale_color_cheysson("1883_31") +
   labs(
     title = "Railway Traffic Development",
     subtitle = "Transportation Volume Index (1880-1900)",
@@ -170,7 +180,7 @@ industry_data <- data.frame(
 
 p6 <- ggplot(industry_data, aes(year, value, fill = sector)) +
   geom_area(alpha = 0.85, color = "black", linewidth = 0.4) +
-  scale_fill_cheysson("1881_04") +
+  scale_fill_cheysson("1881_22") +
   labs(
     title = "Industrial Production by Sector",
     subtitle = "Economic Output Distribution (1880-1895)",
@@ -231,24 +241,24 @@ if (requireNamespace("ggpattern", quietly = TRUE)) {
 
   p8 <- ggplot(infrastructure, aes(region, length, fill = type)) +
     geom_col_pattern(
-      aes(pattern_type = type, pattern_fill = type),
-      pattern = "stripe",
+      aes(pattern = type, pattern_fill = type),
       position = "dodge",
       pattern_density = 0.35,
       pattern_spacing = 0.02,
       color = "black",
       linewidth = 0.5
     ) +
-    scale_fill_cheysson_pattern("1881_03") +
-    scale_pattern_fill_cheysson("1881_03") +
-    scale_pattern_type_cheysson("1881_03") +
+    scale_fill_cheysson_pattern("1881_12") +
+    scale_pattern_fill_cheysson("1881_12") +
+    scale_pattern_type_cheysson("1881_12") +
     labs(
       title = "Transportation Network Comparison",
       subtitle = "Infrastructure Development by Region (1890)",
       x = "Region",
-      y = "Network Extent (kilometers × 100)",
+      y = "Network Extent (hundreds of km)",
       fill = "Type",
-      pattern_type = "Type"
+      pattern = "Type",
+      pattern_fill = "Type"
     ) +
     theme_cheysson() +
     theme(legend.position = "right")
@@ -269,7 +279,7 @@ departments <- data.frame(
 p9 <- ggplot(departments, aes(x, y, fill = value)) +
   geom_tile(color = "black", linewidth = 1.2) +
   geom_text(aes(label = dept), size = 3.5, fontface = "bold") +
-  scale_fill_cheysson("1880_07", discrete = FALSE) +
+  scale_fill_cheysson("1880_21", discrete = FALSE) +
   coord_equal() +
   labs(
     title = "Regional Statistics Map",
@@ -288,12 +298,15 @@ temp_data <- data.frame(
               0.1, 0.3, -0.2, 0.4, 0.2, -0.3, 0.5, 0.3, 0.6)
 )
 
+# Diverging palette 1883_21: one extreme, neutral middle, other extreme
+div_pal <- cheysson_pal("1883_21")
+
 p10 <- ggplot(temp_data, aes(year, 1, fill = anomaly)) +
   geom_tile(height = 0.5) +
   scale_fill_gradient2(
-    low = cheysson_pal("diverging")[[1]][1],
-    mid = "#f5f5f5",
-    high = cheysson_pal("diverging")[[1]][5],
+    low = div_pal[1],
+    mid = div_pal[2],
+    high = div_pal[3],
     midpoint = 0
   ) +
   labs(
@@ -301,7 +314,7 @@ p10 <- ggplot(temp_data, aes(year, 1, fill = anomaly)) +
     subtitle = "Using Diverging Palette",
     x = "Year",
     y = "",
-    fill = "Anomaly (°C)"
+    fill = "Anomaly (C)"
   ) +
   theme_cheysson() +
   theme(

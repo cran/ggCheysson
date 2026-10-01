@@ -5,7 +5,7 @@
 \alias{cheysson_patterns}
 \title{Cheysson Pattern Data}
 \format{
-A list of 20 pattern palettes, each containing:
+A list of 25 pattern palettes, each containing:
 \describe{
 \item{patterns}{List of pattern specifications with fill colors and hatching parameters}
 \item{type}{Palette type: "sequential", "diverging", "grouped", or "category"}
@@ -38,16 +38,20 @@ Each pattern specification includes:
 \item \strong{pattern_spacing}: Spacing between pattern lines
 \item \strong{pattern_linewidth}: Width of pattern lines
 }
+
+Patterns are stored in the same order as \link{cheysson_palettes}: sequential
+palettes from low to high (lightest hatching to solid), diverging palettes
+end to end with the solid fills at the extremes.
 }
 \examples{
 # List available pattern palettes
 names(cheysson_patterns)
 
 # Get patterns from a specific palette
-cheysson_patterns$`1881_03`
+cheysson_patterns$`1881_12`
 
 }
 \seealso{
-\code{\link{cheysson_pattern}}, \code{\link{scale_pattern_fill_cheysson}}
+\code{\link[=cheysson_pattern]{cheysson_pattern()}}, \code{\link[=scale_pattern_fill_cheysson]{scale_pattern_fill_cheysson()}}
 }
 \keyword{datasets}

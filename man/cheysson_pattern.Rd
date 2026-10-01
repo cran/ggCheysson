@@ -4,13 +4,16 @@
 \alias{cheysson_pattern}
 \title{Get Cheysson pattern specifications}
 \usage{
-cheysson_pattern(palette = "1881_03", n = NULL, type = 1)
+cheysson_pattern(palette = "1881_12", n = NULL, type = 1)
 }
 \arguments{
-\item{palette}{Name of palette (e.g., "1881_03") or palette type
+\item{palette}{Name of palette (e.g., "1881_12") or palette type
 ("sequential", "diverging", "grouped", "category").}
 
-\item{n}{Number of patterns to return. If NULL, returns all patterns.}
+\item{n}{Number of patterns to return. If NULL, returns all patterns. If
+\code{n} is smaller than the palette, sequential and diverging palettes return
+patterns spread over the whole palette, keeping both ends; other types
+return the first \code{n}. If \code{n} is larger, patterns are recycled.}
 
 \item{type}{If palette is a type name, which palette of that type to use (default 1).}
 }
@@ -22,10 +25,10 @@ Returns pattern specifications from a Cheysson palette for use with ggpattern.
 }
 \examples{
 # Get all patterns from a palette
-cheysson_pattern("1881_03")
+cheysson_pattern("1881_12")
 
 # Get first 3 patterns
-cheysson_pattern("1881_03", n = 3)
+cheysson_pattern("1881_12", n = 3)
 
 # Get patterns from a sequential palette
 cheysson_pattern("sequential")

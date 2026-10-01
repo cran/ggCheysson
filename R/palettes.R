@@ -4,7 +4,7 @@
 #' under the direction of Émile Cheysson. These palettes are organized by
 #' album year and plate number.
 #'
-#' @format A list of 20 color palettes, each containing:
+#' @format A list of 25 color palettes, each containing:
 #' \describe{
 #'   \item{colors}{Character vector of hex color codes}
 #'   \item{type}{Palette type: "sequential", "diverging", "grouped", or "category"}
@@ -20,19 +20,26 @@
 #' refers to plate 7 from the 1880 album.
 #'
 #' Palette types:
-#' \itemize{
-#'   \item \strong{Sequential} (7 palettes): Ordered colors for quantitative data
-#'   \item \strong{Diverging} (2 palettes): Two contrasting colors with neutral midpoint
-#'   \item \strong{Grouped} (5 palettes): Related colors for comparing groups
-#'   \item \strong{Category} (6 palettes): Distinct colors for categorical data
-#' }
+#' - **Sequential** (7 palettes): Ordered colors for quantitative data
+#' - **Diverging** (2 palettes): Two contrasting colors with neutral midpoint
+#' - **Grouped** (10 palettes): Related colors for comparing groups
+#' - **Category** (6 palettes): Distinct colors for categorical data
+#'
+#' Palette order: sequential palettes are stored from low to high (light to
+#' dark), and diverging palettes from one extreme through the neutral middle
+#' to the other, so `reverse = TRUE` in the scales flips the direction the
+#' same way for every palette. Category and grouped palettes keep the order
+#' of RJ Andrews' swatches. (`1886_26`, typed "sequential" in the source, has
+#' two hues and no single light-to-dark order.) Some sequential palettes, such
+#' as `1881_12`, have a single color: their steps are in the hatching, see
+#' [cheysson_patterns].
 #'
 #' @source
 #' Color patterns digitized by RJ Andrews from the David Rumsey Map Collection
-#' \url{https://github.com/infowetrust/albumcolors}
+#' <https://github.com/infowetrust/albumcolors>
 #'
 #' Observable implementation by Tom Shanley
-#' \url{https://web.archive.org/web/20210130125506/https://observablehq.com/@tomshanley/cheysson-color-palettes}
+#' <https://web.archive.org/web/20210130125506/https://observablehq.com/@tomshanley/cheysson-color-palettes>
 #'
 #' @examples
 #' # List available palettes
@@ -45,21 +52,23 @@
 #' sequential_pals <- Filter(function(x) x$type == "sequential", cheysson_palettes)
 #' names(sequential_pals)
 #'
-#' @seealso \code{\link{cheysson_pal}}, \code{\link{scale_color_cheysson}}
+#' @seealso [cheysson_pal()], [scale_color_cheysson()]
 "cheysson_palettes"
 
 
 #' Get a Cheysson color palette
 #'
 #' Returns colors from a specified Cheysson palette. Palettes can be referenced
-#' by name (e.g., "1880_07") or by selecting a palette of a particular type.
+#' by name (e.g., "1880_21") or by selecting a palette of a particular type.
 #'
-#' @param palette Name of palette (e.g., "1880_07"), or palette type
+#' @param palette Name of palette (e.g., "1880_21"), or palette type
 #'   ("sequential", "diverging", "grouped", "category"). If a type is specified,
 #'   the first palette of that type is returned.
 #' @param n Number of colors to return. If NULL, returns all colors in the palette.
-#'   If n is greater than the number of colors in the palette, colors will be
-#'   interpolated.
+#'   If `n` is smaller than the palette, sequential and diverging palettes
+#'   return colors spread over the whole palette, keeping both ends; other
+#'   types return the first `n`. If `n` is greater than the number of colors
+#'   in the palette, colors will be interpolated.
 #' @param type If palette is a type name, optionally specify which palette of
 #'   that type to use (default is 1 for the first).
 #'
@@ -69,10 +78,10 @@
 #'
 #' @examples
 #' # Get all colors from a specific palette
-#' cheysson_pal("1880_07")
+#' cheysson_pal("1880_21")
 #'
 #' # Get 5 colors from a palette
-#' cheysson_pal("1880_07", n = 5)
+#' cheysson_pal("1880_21", n = 5)
 #'
 #' # Get colors from first sequential palette
 #' cheysson_pal("sequential")
@@ -81,46 +90,60 @@
 #' cheysson_pal("category", type = 2)
 #'
 #' @export
-cheysson_pal <- function(palette = "1880_07", n = NULL, type = 1) {
-  # Check if palette exists directly
-  if (palette %in% names(cheysson_palettes)) {
-    pal <- cheysson_palettes[[palette]]
-  } else {
-    # Check if it's a type name
-    palette_type <- tolower(palette)
-    if (palette_type %in% c("sequential", "diverging", "grouped", "category")) {
-      # Get palettes of this type
-      type_palettes <- Filter(function(x) x$type == palette_type, cheysson_palettes)
-      if (length(type_palettes) == 0) {
-        stop(sprintf("No palettes of type '%s' found", palette_type))
-      }
-      if (type > length(type_palettes)) {
-        stop(sprintf("Only %d palettes of type '%s' available", length(type_palettes), palette_type))
-      }
-      pal <- type_palettes[[type]]
-    } else {
-      available <- paste(names(cheysson_palettes), collapse = ", ")
-      stop(sprintf("Palette '%s' not found. Available palettes: %s", palette, available))
-    }
-  }
-
-  colors <- pal$colors
-
-  # Return colors
+cheysson_pal <- function(palette = "1880_21", n = NULL, type = 1) {
+  pal <- get_palette(palette, cheysson_palettes, type)
   if (is.null(n)) {
-    return(colors)
+    return(pal$colors)
   }
+  select_values(pal$colors, n, pal$type, interpolate = TRUE)
+}
 
-  # If n is specified
+
+# Look up a palette in `palettes` (cheysson_palettes or cheysson_patterns) by
+# name, or by type name ("sequential", ...) taking the `type`-th of that type.
+# Returns the palette's list element (including its `type`), plus its `name`.
+get_palette <- function(palette, palettes, type = 1) {
+  if (palette %in% names(palettes)) {
+    note_renamed_palette(palette)
+    return(c(palettes[[palette]], name = palette))
+  }
+  palette_type <- tolower(palette)
+  if (!palette_type %in% c("sequential", "diverging", "grouped", "category")) {
+    palette_not_found(palette, names(palettes))
+  }
+  type_palettes <- Filter(function(x) x$type == palette_type, palettes)
+  if (length(type_palettes) == 0) {
+    stop(sprintf("No palettes of type '%s' found", palette_type))
+  }
+  if (type > length(type_palettes)) {
+    stop(sprintf("Only %d palettes of type '%s' available", length(type_palettes), palette_type))
+  }
+  c(type_palettes[[type]], name = names(type_palettes)[type])
+}
+
+
+# Choose `n` values from a palette's values `x`. Sequential and diverging
+# palettes are stored low -> high (see ?cheysson_palettes), so for n < length
+# the picks are spread over the whole palette, keeping both ends; category and
+# grouped palettes take the first n. For n > length, colors are interpolated
+# (`interpolate = TRUE`) and anything else is recycled.
+select_values <- function(x, n, type, reverse = FALSE, interpolate = FALSE) {
   if (length(n) != 1 || !is.numeric(n) || n < 1) {
     stop("`n` must be a single positive number")
   }
-  if (n <= length(colors)) {
-    # Return first n colors
-    return(colors[1:n])
+  if (reverse) {
+    x <- rev(x)
+  }
+  if (n > length(x)) {
+    if (interpolate) {
+      return(grDevices::colorRampPalette(x)(n))
+    }
+    return(rep(x, length.out = n))
+  }
+  if (type %in% c("sequential", "diverging")) {
+    x[round(seq(1, length(x), length.out = n))]
   } else {
-    # Interpolate colors if n > length(colors)
-    grDevices::colorRampPalette(colors)(n)
+    x[seq_len(n)]
   }
 }
 
@@ -177,7 +200,7 @@ list_cheysson_pals <- function(type = NULL) {
 #' their hex codes. This is useful for documentation, presentations, and exploring
 #' the available palettes.
 #'
-#' @param palette Name of palette (e.g., "1880_07"), or palette type
+#' @param palette Name of palette (e.g., "1880_21"), or palette type
 #'   ("sequential", "diverging", "grouped", "category").
 #' @param n Number of colors to display. If NULL (default), shows all colors in
 #'   the palette. If specified, will interpolate if n > palette size.
@@ -192,37 +215,25 @@ list_cheysson_pals <- function(type = NULL) {
 #'
 #' @examples
 #' # Display a specific palette
-#' show_palette("1880_07")
+#' show_palette("1880_21")
 #'
 #' # Display palette without metadata
-#' show_palette("1881_03", show_info = FALSE)
+#' show_palette("1881_30", show_info = FALSE)
 #'
 #' # Display 10 interpolated colors
-#' show_palette("1895_04", n = 10)
+#' show_palette("1895_16", n = 10)
 #'
 #' # Display first sequential palette
 #' show_palette("sequential")
 #'
 #' @export
-show_palette <- function(palette = "1880_07", n = NULL, show_info = TRUE, cex = 1) {
+show_palette <- function(palette = "1880_21", n = NULL, show_info = TRUE, cex = 1) {
   # Get palette information
-  if (palette %in% names(cheysson_palettes)) {
-    pal <- cheysson_palettes[[palette]]
-    pal_name <- palette
-  } else {
-    # Check if it's a type name
-    palette_type <- tolower(palette)
-    if (palette_type %in% c("sequential", "diverging", "grouped", "category")) {
-      type_palettes <- Filter(function(x) x$type == palette_type, cheysson_palettes)
-      pal <- type_palettes[[1]]
-      pal_name <- names(type_palettes)[1]
-    } else {
-      stop(sprintf("Palette '%s' not found", palette))
-    }
-  }
+  pal <- get_palette(palette, cheysson_palettes)
+  pal_name <- pal$name
 
   # Get colors
-  colors <- cheysson_pal(pal_name, n = n)
+  colors <- if (is.null(n)) pal$colors else select_values(pal$colors, n, pal$type, interpolate = TRUE)
   n_colors <- length(colors)
 
   # Save old par settings (only the ones we'll change)
@@ -285,7 +296,7 @@ show_palette <- function(palette = "1880_07", n = NULL, show_info = TRUE, cex = 
 #' show_palettes("sequential", ncol = 2)
 #'
 #' # Show specific palettes
-#' show_palettes(c("1880_07", "1881_03", "1895_04"))
+#' show_palettes(c("1880_21", "1883_21", "1895_16"))
 #'
 #' @export
 show_palettes <- function(palettes = NULL, ncol = 1, cex = 0.8) {
