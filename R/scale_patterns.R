@@ -146,9 +146,9 @@ scale_fill_cheysson_pattern <- function(palette = "1881_12", reverse = FALSE, ..
 # "none"/0; colors default to NA.
 cheysson_pattern_scale <- function(palette, reverse, aesthetic, scale_name, param,
                                    na.value = pattern_na_value(aesthetic), ...) {
-  pal <- get_palette(palette, cheysson_patterns)
+  pal <- get_palette(palette, ggCheysson::cheysson_patterns)
   values <- cheysson_pattern_params(pal$patterns, param)
-  ggplot2::discrete_scale(
+  cheysson_discrete_scale(
     aesthetics = aesthetic,
     scale_name = scale_name,
     palette = function(n) select_values(values, n, pal$type, reverse = reverse),

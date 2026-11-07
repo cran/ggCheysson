@@ -138,23 +138,9 @@ print(p3)
 
 ## ----map-literacy-pattern, fig.height=7, fig.width=8--------------------------
 # Literacy with patterns - quintessential Cheysson style
-lit_spacing <- cheysson_pattern_params(cheysson_pattern("1888_27"), "pattern_spacing")
-
-p3b <- ggplot(france_data) +
-  geom_sf_pattern(
-    aes(fill = Literacy_quint,
-        pattern = Literacy_quint,
-        pattern_fill = Literacy_quint,
-        pattern_spacing = Literacy_quint),
-    pattern_density = 0.3,
-    pattern_colour = NA,
-    color = "black",
-    linewidth = 0.4
-  ) +
-  scale_fill_cheysson_pattern("1888_27", na.value = "grey90") +
-  scale_pattern_fill_cheysson("1888_27", na.value = "grey90") +
-  scale_pattern_type_cheysson("1888_27") +
-  scale_pattern_spacing_manual(values = 0.3 * lit_spacing) +
+p3b <- ggplot(france_data, aes(pattern = Literacy_quint)) +
+  geom_sf_pattern(fill = "grey90", color = "black", linewidth = 0.4) +
+  scale_cheysson("1888_27", name = "Literacy\nQuintile") +
   labs(
     title = "Literacy Rates",
     subtitle = "Sequential hatching, sparse to solid (quintiles)",
@@ -163,12 +149,6 @@ p3b <- ggplot(france_data) +
   theme_cheysson_map() +
   theme(
     legend.position = "right"
-  ) +
-  guides(
-    fill = guide_legend(title = "Literacy\nQuintile"),
-    pattern = guide_legend(title = "Literacy\nQuintile"),
-    pattern_spacing = guide_legend(title = "Literacy\nQuintile"),
-    pattern_fill = guide_legend(title = "Literacy\nQuintile")
   )
 
 print(p3b)
@@ -201,20 +181,9 @@ print(p4)
 
 ## ----map-donations-pattern, fig.height=7, fig.width=8-------------------------
 # Donations: solid at the extremes, hatched in the middle
-p4b <- ggplot(france_data) +
-  geom_sf_pattern(
-    aes(fill = Donations_cat,
-        pattern = Donations_cat,
-        pattern_fill = Donations_cat),
-    pattern_density = 0.35,
-    pattern_spacing = 0.025,
-    pattern_colour = NA,
-    color = "black",
-    linewidth = 0.4
-  ) +
-  scale_fill_cheysson_pattern("1883_31", na.value = "grey90") +
-  scale_pattern_fill_cheysson("1883_31", na.value = "grey90") +
-  scale_pattern_type_cheysson("1883_31") +
+p4b <- ggplot(france_data, aes(pattern = Donations_cat)) +
+  geom_sf_pattern(fill = "grey90", color = "black", linewidth = 0.4) +
+  scale_cheysson("1883_31", name = "Donations\nLevel") +
   labs(
     title = "Charitable Donations",
     subtitle = "Authentic Cheysson-style patterns and colors (quartiles)",
@@ -223,11 +192,6 @@ p4b <- ggplot(france_data) +
   theme_cheysson_map() +
   theme(
     legend.position = "right"
-  ) +
-  guides(
-    fill = guide_legend(title = "Donations\nLevel"),
-    pattern = guide_legend(title = "Donations\nLevel"),
-    pattern_fill = guide_legend(title = "Donations\nLevel")
   )
 
 print(p4b)
@@ -334,30 +298,13 @@ print(p8)
 
 ## ----map-regions-pattern, fig.height=7, fig.width=8---------------------------
 # Regions with distinctive patterns - very characteristic of Cheysson
-p8b <- ggplot(france_data) +
-  geom_sf_pattern(
-    aes(fill = .data[[region_col]],
-        pattern = .data[[region_col]],
-        pattern_fill = .data[[region_col]],
-        pattern_fill2 = .data[[region_col]],
-        pattern_angle = .data[[region_col]]),
-    pattern_colour = NA,
-    pattern_density = 0.3,
-    pattern_spacing = 0.02,
-    color = "black",
-    linewidth = 0.5
-  ) +
-  scale_fill_cheysson_pattern("1883_30") +
-  scale_pattern_fill_cheysson("1883_30") +
-  scale_pattern_fill2_cheysson("1883_30") +
-  scale_pattern_type_cheysson("1883_30") +
-  scale_pattern_angle_cheysson("1883_30") +
+p8b <- ggplot(france_data, aes(pattern = .data[[region_col]])) +
+  geom_sf_pattern(color = "black", linewidth = 0.5) +
+  scale_cheysson("1883_30", name = "Region") +
   labs(
     title = "Regions of France",
     subtitle = "Distinctive hatching patterns for each region - authentic Albums style",
-    caption = "Source: Guerry package",
-    fill = "Region", pattern = "Region", pattern_fill = "Region",
-    pattern_fill2 = "Region", pattern_angle = "Region"
+    caption = "Source: Guerry package"
   ) +
   theme_cheysson_map() +
   theme(

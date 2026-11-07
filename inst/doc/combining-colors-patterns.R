@@ -62,25 +62,15 @@ ggplot(trade, aes(country, exports)) +
   theme(legend.position = "none")
 
 ## ----short-form---------------------------------------------------------------
-ggplot(trade, aes(country, exports)) +
-  geom_col_pattern(
-    aes_cheysson(country),
-    pattern_colour = NA, pattern_density = 0.3, pattern_spacing = 0.025,
-    colour = "black"
-  ) +
+ggplot(trade, aes(country, exports, pattern = country)) +
+  geom_col_pattern(colour = "black") +
   scale_cheysson("1886_28") +
   labs(title = "Exports by Nation, 1885", x = NULL, y = "Thousands of francs") +
   theme_cheysson() +
   theme(legend.position = "none")
 
-## ----partial-mapping----------------------------------------------------------
-ggplot(trade, aes(country, exports, fill = country, pattern = country)) +
-  geom_col_pattern(pattern_colour = NA, pattern_density = 0.3, pattern_spacing = 0.025,
-                   colour = "black") +
-  scale_cheysson("1886_28") +
-  labs(title = "Only fill and pattern mapped", x = NULL, y = "Thousands of francs") +
-  theme_cheysson() +
-  theme(legend.position = "none")
+## ----swatch-atlas, fig.width=8, fig.height=10, out.width="100%", fig.alt="Atlas of all 134 Cheysson swatches: one row per palette, grouped into panels by palette type (sequential, diverging, grouped, category), with columns numbered by element; each cell shows a solid fill, stripes or crosshatching"----
+show_swatches()
 
 ## ----legend, fig.width=8------------------------------------------------------
 infrastructure <- data.frame(
@@ -89,13 +79,8 @@ infrastructure <- data.frame(
   length = c(250, 300, 450,  250, 400, 350,  300, 200, 500,  250, 350, 400)
 )
 
-ggplot(infrastructure, aes(region, length)) +
-  geom_col_pattern(
-    aes_cheysson(type),
-    position = "dodge",
-    pattern_colour = NA, pattern_density = 0.35, pattern_spacing = 0.02,
-    colour = "black"
-  ) +
+ggplot(infrastructure, aes(region, length, pattern = type)) +
+  geom_col_pattern(position = "dodge", colour = "black") +
   scale_cheysson("1881_12", name = "Network") +
   labs(title = "Transportation Networks by Region", x = NULL, y = "Hundreds of km") +
   theme_cheysson()
@@ -107,12 +92,8 @@ opinion <- data.frame(
   percent = c(18, 27, 34, 21)
 )
 
-ggplot(opinion, aes(response, percent)) +
-  geom_col_pattern(
-    aes_cheysson(response),
-    pattern_colour = NA, pattern_density = 0.35, pattern_spacing = 0.025,
-    colour = "black"
-  ) +
+ggplot(opinion, aes(response, percent, pattern = response)) +
+  geom_col_pattern(colour = "black") +
   scale_cheysson("1883_31") +
   labs(title = "A Diverging Palette", x = NULL, y = "Percent") +
   theme_cheysson() +
@@ -121,13 +102,9 @@ ggplot(opinion, aes(response, percent)) +
 ## ----missing------------------------------------------------------------------
 trade_na <- rbind(trade, data.frame(country = NA, exports = 1500))
 
-ggplot(trade_na, aes(country, exports)) +
-  geom_col_pattern(
-    aes_cheysson(country),
-    pattern_colour = NA, pattern_density = 0.3, pattern_spacing = 0.025,
-    colour = "black"
-  ) +
-  scale_cheysson("1886_28", na.value = "grey90") +
+ggplot(trade_na, aes(country, exports, pattern = country)) +
+  geom_col_pattern(fill = "grey90", colour = "black") +
+  scale_cheysson("1886_28") +
   labs(title = "Exports by Nation, 1885", x = NULL, y = "Thousands of francs") +
   theme_cheysson() +
   theme(legend.position = "none")
@@ -137,7 +114,9 @@ ggplot(trade, aes(country, exports, fill = country, pattern = country,
                   pattern_fill = country)) +
   geom_col_pattern(pattern_colour = NA, pattern_density = 0.3, pattern_spacing = 0.025,
                    colour = "black") +
-  scale_cheysson("1886_28", aesthetics = c("fill", "pattern", "pattern_fill")) +
+  scale_fill_cheysson_pattern("1886_28") +
+  scale_pattern_type_cheysson("1886_28") +
+  scale_pattern_fill_cheysson("1886_28") +
   labs(title = "Without the palette's angles", x = NULL, y = "Thousands of francs") +
   theme_cheysson() +
   theme(legend.position = "none")

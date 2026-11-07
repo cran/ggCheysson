@@ -45,10 +45,10 @@ NULL
 #' @rdname scale_color_cheysson
 #' @export
 scale_color_cheysson <- function(palette = "1880_21", discrete = TRUE, reverse = FALSE, ...) {
-  pal <- get_palette(palette, cheysson_palettes)
+  pal <- get_palette(palette, ggCheysson::cheysson_palettes)
 
   if (discrete) {
-    ggplot2::discrete_scale("colour", "cheysson",
+    cheysson_discrete_scale("colour", "cheysson",
                            palette = function(n) {
                              select_values(pal$colors, n, pal$type,
                                            reverse = reverse, interpolate = TRUE)
@@ -69,10 +69,10 @@ scale_colour_cheysson <- scale_color_cheysson
 #' @rdname scale_color_cheysson
 #' @export
 scale_fill_cheysson <- function(palette = "1880_21", discrete = TRUE, reverse = FALSE, ...) {
-  pal <- get_palette(palette, cheysson_palettes)
+  pal <- get_palette(palette, ggCheysson::cheysson_palettes)
 
   if (discrete) {
-    ggplot2::discrete_scale("fill", "cheysson",
+    cheysson_discrete_scale("fill", "cheysson",
                            palette = function(n) {
                              select_values(pal$colors, n, pal$type,
                                            reverse = reverse, interpolate = TRUE)

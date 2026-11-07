@@ -110,17 +110,9 @@ if (requireNamespace("ggpattern", quietly = TRUE)) {
     exports = c(2350, 3120, 2680, 1890)
   )
 
-  p4 <- ggplot(trade_data, aes(reorder(country, exports), exports, fill = country)) +
-    geom_col_pattern(
-      aes(pattern = country, pattern_fill = country),
-      pattern_density = 0.3,
-      pattern_spacing = 0.025,
-      color = "black",
-      linewidth = 0.8
-    ) +
-    scale_fill_cheysson_pattern("1886_28") +
-    scale_pattern_fill_cheysson("1886_28") +
-    scale_pattern_type_cheysson("1886_28") +
+  p4 <- ggplot(trade_data, aes(reorder(country, exports), exports, pattern = country)) +
+    geom_col_pattern(color = "black", linewidth = 0.8) +
+    scale_cheysson("1886_28") +
     labs(
       title = "Export Statistics by Nation",
       subtitle = "Annual Trade Volume (1885)",
@@ -230,7 +222,8 @@ if (requireNamespace("ggpattern", quietly = TRUE)) {
   # Infrastructure comparison
   infrastructure <- data.frame(
     region = rep(c("North", "South", "East", "West"), each = 3),
-    type = rep(c("Rail", "Canal", "Road"), 4),
+    # a factor, so the levels take the sequential palette from light to dense
+    type = factor(rep(c("Rail", "Canal", "Road"), 4), levels = c("Road", "Canal", "Rail")),
     length = c(
       450, 300, 250,  # North
       350, 400, 250,  # South
@@ -239,26 +232,14 @@ if (requireNamespace("ggpattern", quietly = TRUE)) {
     )
   )
 
-  p8 <- ggplot(infrastructure, aes(region, length, fill = type)) +
-    geom_col_pattern(
-      aes(pattern = type, pattern_fill = type),
-      position = "dodge",
-      pattern_density = 0.35,
-      pattern_spacing = 0.02,
-      color = "black",
-      linewidth = 0.5
-    ) +
-    scale_fill_cheysson_pattern("1881_12") +
-    scale_pattern_fill_cheysson("1881_12") +
-    scale_pattern_type_cheysson("1881_12") +
+  p8 <- ggplot(infrastructure, aes(region, length, pattern = type)) +
+    geom_col_pattern(position = "dodge", color = "black", linewidth = 0.5) +
+    scale_cheysson("1881_12", name = "Type") +
     labs(
       title = "Transportation Network Comparison",
       subtitle = "Infrastructure Development by Region (1890)",
       x = "Region",
-      y = "Network Extent (hundreds of km)",
-      fill = "Type",
-      pattern = "Type",
-      pattern_fill = "Type"
+      y = "Network Extent (hundreds of km)"
     ) +
     theme_cheysson() +
     theme(legend.position = "right")
